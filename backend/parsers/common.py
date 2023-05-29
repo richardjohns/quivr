@@ -40,6 +40,8 @@ async def process_file(file: UploadFile, loader_class, file_suffix, enable_summa
     documents = text_splitter.split_documents(documents)
 
     for doc in documents:
+        # Remove null characters from page_content and reassign it
+        doc.page_content = doc.page_content.replace("\u0000", "")
         metadata = {
             "file_sha1": file_sha1,
             "file_size": file_size,

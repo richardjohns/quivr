@@ -2,12 +2,14 @@ import os
 import shutil
 import time
 from tempfile import SpooledTemporaryFile
+from typing import Annotated, List, Tuple
 
 import pypandoc
 from auth_bearer import JWTBearer
 from crawl.crawler import CrawlWebsite
-from fastapi import Depends, FastAPI, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from llm.qa import get_qa_llm
 from llm.summarization import llm_evaluate_summaries
 from logger import get_logger
@@ -152,6 +154,8 @@ async def chat_endpoint(commons: CommonsDep, chat_message: ChatMessage, credenti
         summaries = similarity_search(
             chat_message.question, table='match_summaries')
         # 2. evaluate summaries against the question
+        print(chat_message.question)
+        print(summaries)
         evaluations = llm_evaluate_summaries(
             chat_message.question, summaries, chat_message.model)
         # 3. pull in the top documents from summaries

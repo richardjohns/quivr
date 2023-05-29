@@ -9,7 +9,6 @@ from langchain.vectorstores import SupabaseVectorStore
 from llm.summarization import llm_summerize
 from logger import get_logger
 from pydantic import BaseModel
-
 from supabase import Client, create_client
 
 logger = get_logger(__name__)
@@ -53,11 +52,12 @@ CommonsDep = Annotated[dict, Depends(common_dependencies)]
 
 class ChatMessage(BaseModel):
     model: str = "gpt-3.5-turbo"
+    # model: str = "gpt-4"
     question: str
     # A list of tuples where each tuple is (speaker, text)
     history: List[Tuple[str, str]]
     temperature: float = 0.0
-    max_tokens: int = 256
+    max_tokens: int = 2560
     use_summarization: bool = False
 
 

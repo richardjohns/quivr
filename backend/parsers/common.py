@@ -1,13 +1,15 @@
-from typing import Optional
-from fastapi import UploadFile
-from langchain.schema import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 # from stats import add_usage
 import asyncio
 import os
 import tempfile
 import time
-from utils import compute_sha1_from_file, compute_sha1_from_content, create_summary, documents_vector_store
+from typing import Optional
+
+from fastapi import UploadFile
+from langchain.schema import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from utils import (compute_sha1_from_content, compute_sha1_from_file,
+                   create_summary, documents_vector_store)
 
 
 async def process_file(file: UploadFile, loader_class, file_suffix, enable_summarization):
@@ -38,6 +40,8 @@ async def process_file(file: UploadFile, loader_class, file_suffix, enable_summa
     documents = text_splitter.split_documents(documents)
 
     for doc in documents:
+        # Remove null characters from page_content and reassign it
+        doc.page_content = doc.page_content.replace("\u0000", "")
         metadata = {
             "file_sha1": file_sha1,
             "file_size": file_size,

@@ -1,6 +1,11 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import os
 import shutil
 import time
+from shutil import which
 from tempfile import SpooledTemporaryFile
 from typing import Annotated, List, Tuple
 
@@ -52,7 +57,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    pypandoc.download_pandoc()
+    if which("pandoc") is None:  # Check if pandoc is installed
+        pypandoc.download_pandoc()  # Download pandoc if it is not installed
 
 
 file_processors = {

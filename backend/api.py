@@ -86,6 +86,8 @@ file_processors = {
 class User (BaseModel):
     email: str
 
+class ErrorMessage(BaseModel):
+    message: str
 
 async def filter_file(file: UploadFile, enable_summarization: bool, supabase_client: Client, user: User):
     if await file_already_exists(supabase_client, file, user):
@@ -236,3 +238,8 @@ async def download_endpoint(commons: CommonsDep, file_name: str,credentials: dic
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.post("/logerror")
+async def log_error(err_msg: ErrorMessage):
+    logger.error(err_msg.message)
+    return {"detail": "Error message logged successfully"}

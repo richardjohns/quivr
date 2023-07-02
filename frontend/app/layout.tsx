@@ -2,11 +2,15 @@ import { createServerComponentSupabaseClient } from "@supabase/auth-helpers-next
 import { Analytics } from "@vercel/analytics/react";
 import { Inter } from "next/font/google";
 import { cookies, headers } from "next/headers";
-import { BrainConfigProvider } from "../lib/context/BrainConfigProvider/brain-config-provider";
-import NavBar from "./components/NavBar";
-import { ToastProvider } from "./components/ui/Toast";
+
+import Footer from "@/lib/components/Footer";
+import { NavBar } from "@/lib/components/NavBar";
+import { TrackingWrapper } from "@/lib/components/TrackingWrapper";
+import { ToastProvider } from "@/lib/components/ui/Toast";
+import { BrainProvider } from "@/lib/context";
+import { BrainConfigProvider } from "@/lib/context/BrainConfigProvider/brain-config-provider";
+import { SupabaseProvider } from "@/lib/context/SupabaseProvider";
 import "./globals.css";
-import SupabaseProvider from "./supabase-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,11 +20,11 @@ export const metadata = {
     "Quivr is your second brain in the cloud, designed to easily store and retrieve unstructured information.",
 };
 
-export default async function RootLayout({
+const RootLayout = async ({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): Promise<JSX.Element> => {
   const supabase = createServerComponentSupabaseClient({
     headers,
     cookies,
@@ -33,13 +37,17 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-white text-black dark:bg-black dark:text-white min-h-screen w-full ${inter.className}`}
+        className={`bg-white text-black min-h-screen flex flex-col dark:bg-black dark:text-white w-full ${inter.className}`}
       >
         <ToastProvider>
           <SupabaseProvider session={session}>
             <BrainConfigProvider>
-              <NavBar />
-              {children}
+              <BrainProvider>
+                <TrackingWrapper />
+                <NavBar />
+                <div className="flex-1">{children}</div>
+                <Footer />
+              </BrainProvider>
             </BrainConfigProvider>
           </SupabaseProvider>
         </ToastProvider>
@@ -47,4 +55,6 @@ export default async function RootLayout({
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

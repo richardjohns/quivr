@@ -1,9 +1,12 @@
-import { useSupabase } from "@/app/supabase-provider";
-import { useToast } from "@/lib/hooks/useToast";
-import { useAxios } from "@/lib/useAxios";
-import axios, { AxiosError } from "axios";
+/* eslint-disable */
 import { redirect } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
+
+import { useSupabase } from "@/lib/context/SupabaseProvider";
+import { useAxios, useToast } from "@/lib/hooks";
+import { useEventTracking } from "@/services/analytics/useEventTracking";
+
+import { UUID } from "crypto";
 import { isValidUrl } from "../helpers/isValidUrl";
 
 interface ErrorData {
@@ -17,80 +20,64 @@ export const useCrawler = () => {
   const { session } = useSupabase();
   const { publish } = useToast();
   const { axiosInstance } = useAxios();
+  const { track } = useEventTracking();
 
   if (session === null) {
     redirect("/login");
   }
 
-  const logErrorToBackend = async (errorMessage: string): Promise<void> => {
-    await axios.post("/logerror", { message: errorMessage });
-  };
+  const crawlWebsite = useCallback(
+    async (brainId: UUID | undefined) => {
+      // Validate URL
+      const url = urlInputRef.current ? urlInputRef.current.value : null;
 
-  const crawlWebsite = useCallback(async () => {
-    setCrawling(true);
-    // Validate URL
-    const url = urlInputRef.current ? urlInputRef.current.value : null;
+      if (!url || !isValidUrl(url)) {
+        void track("URL_INVALID");
 
-    if (!url || !isValidUrl(url)) {
-      // Assuming you have a function to validate URLs
-      publish({
-        variant: "danger",
-        text: "Invalid URL",
-      });
-      setCrawling(false);
-      return;
-    }
-
-    // Configure parameters
-    const config = {
-      url: url,
-      js: false,
-      depth: 1,
-      max_pages: 100,
-      max_time: 60,
-    };
-
-    try {
-      const response = await axiosInstance.post(`/crawl`, config);
-
-      publish({
-        variant: response.data.type,
-        text: response.data.message,
-      });
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        // Extract and log detailed information about the error
-        console.log("Axios request configuration:", axiosError.config);
-        console.log("Request made:", axiosError.request);
-        console.log("Server response:", axiosError.response);
-
-        if (axiosError.response && axiosError.response.data) {
-          // If the server response includes a data object, use that as the error message
-          const errorData = axiosError.response.data as ErrorData;
-          setErrorMessage(errorData.message || "Unknown error");
-        } else {
-          // Otherwise, use the error message from the AxiosError object
-          setErrorMessage(axiosError.message);
-        }
-
-        // Log the error message to the backend
-        if (errorMessage) {
-          await logErrorToBackend(errorMessage);
-        }
-        
         publish({
           variant: "danger",
-          text: "Failed to crawl website: " + errorMessage,
+          text: "Invalid URL",
         });
-      } else {
-        // If the error isn't an AxiosError, it might have a message property
-        setErrorMessage((error as Error).message);
+
+        return;
       }
-    } finally {
-      setCrawling(false);
-    }
-  }, [session.access_token, publish]);
+
+      // Configure parameters
+      const config = {
+        url: url,
+        js: false,
+        depth: 1,
+        max_pages: 100,
+        max_time: 60,
+      };
+
+      setCrawling(true);
+      void track("URL_CRAWLED");
+
+      try {
+        console.log("Crawling website...", brainId);
+        if (brainId !== undefined) {
+          const response = await axiosInstance.post(
+            `/crawl?brain_id=${brainId}`,
+            config
+          );
+
+          publish({
+            variant: response.data.type,
+            text: response.data.message,
+          });
+        }
+      } catch (error: unknown) {
+        publish({
+          variant: "danger",
+          text: "Failed to crawl website: " + JSON.stringify(error),
+        });
+      } finally {
+        setCrawling(false);
+      }
+    },
+    [session.access_token, publish]
+  );
 
   return {
     isCrawling,

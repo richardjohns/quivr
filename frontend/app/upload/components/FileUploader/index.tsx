@@ -1,7 +1,9 @@
 "use client";
 import { AnimatePresence } from "framer-motion";
-import Button from "../../../components/ui/Button";
-import Card from "../../../components/ui/Card";
+
+import Button from "@/lib/components/ui/Button";
+import Card from "@/lib/components/ui/Card";
+
 import FileComponent from "./components/FileComponent";
 import { useFileUploader } from "./hooks/useFileUploader";
 
@@ -12,7 +14,6 @@ export const FileUploader = (): JSX.Element => {
     isDragActive,
     isPending,
     open,
-    pendingFileIndex,
     uploadAllFiles,
     files,
     setFiles,
@@ -49,7 +50,7 @@ export const FileUploader = (): JSX.Element => {
                 <AnimatePresence mode="popLayout">
                   {files.map((file) => (
                     <FileComponent
-                      key={file.name + file.size}
+                      key={`${file.name} ${file.size}`}
                       file={file}
                       setFiles={setFiles}
                     />
@@ -61,8 +62,8 @@ export const FileUploader = (): JSX.Element => {
         )}
       </div>
       <div className="flex flex-col items-center justify-center">
-        <Button isLoading={isPending} onClick={uploadAllFiles}>
-          {isPending ? `Uploading ${files[pendingFileIndex].name}` : "Upload"}
+        <Button isLoading={isPending} onClick={() => void uploadAllFiles()}>
+          {isPending ? "Uploading..." : "Upload"}
         </Button>
       </div>
     </section>

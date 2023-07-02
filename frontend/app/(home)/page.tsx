@@ -1,16 +1,19 @@
-import Features from "./Features";
-import Hero from "./Hero";
 import { redirect } from "next/navigation";
 
-export default function HomePage() {
+import Features from "./Features";
+import Hero from "./Hero";
+
+const HomePage = (): JSX.Element => {
   if (process.env.NEXT_PUBLIC_ENV === "local") {
     redirect("/upload");
   }
 
   return (
-    <main className="">
+    <main data-testid="home-page">
       <Hero />
       <Features />
     </main>
   );
-}
+};
+
+export default HomePage;

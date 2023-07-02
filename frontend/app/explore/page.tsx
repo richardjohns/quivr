@@ -1,34 +1,59 @@
+/* eslint-disable */
 "use client";
-import { useAxios } from "@/lib/useAxios";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import Button from "../components/ui/Button";
-import Spinner from "../components/ui/Spinner";
-import { useSupabase } from "../supabase-provider";
-import DocumentItem from "./DocumentItem";
-import { Document } from "./types";
 
-export default function ExplorePage() {
+import Button from "@/lib/components/ui/Button";
+import Spinner from "@/lib/components/ui/Spinner";
+import { useSupabase } from "@/lib/context/SupabaseProvider";
+import { useAxios } from "@/lib/hooks";
+import { Document } from "@/lib/types/Document";
+
+import { getBrainFromLocalStorage } from "@/lib/context/BrainProvider/helpers/brainLocalStorage";
+import { useBrainContext } from "@/lib/context/BrainProvider/hooks/useBrainContext";
+import { UUID } from "crypto";
+import DocumentItem from "./DocumentItem";
+
+const ExplorePage = (): JSX.Element => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isPending, setIsPending] = useState(true);
   const { session } = useSupabase();
   const { axiosInstance } = useAxios();
+  const { setActiveBrain, setDefaultBrain, currentBrain, currentBrainId } =
+    useBrainContext();
+
+  const fetchAndSetActiveBrain = async () => {
+    const storedBrain = getBrainFromLocalStorage();
+    if (storedBrain) {
+      setActiveBrain({ ...storedBrain });
+      return storedBrain;
+    } else {
+      const defaultBrain = await setDefaultBrain();
+      return defaultBrain;
+    }
+  };
 
   if (session === null) {
     redirect("/login");
   }
 
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchDocuments = async (brainId: UUID | null) => {
       setIsPending(true);
+      await fetchAndSetActiveBrain();
       try {
+        if (brainId === undefined || brainId === null) {
+          throw new Error("Brain id not found");
+        }
+
         console.log(
-          `Fetching documents from ${process.env.NEXT_PUBLIC_BACKEND_URL}/explore`
+          `Fetching documents from ${process.env.NEXT_PUBLIC_BACKEND_URL}/explore/?brain_id=${brainId}`
         );
+
         const response = await axiosInstance.get<{ documents: Document[] }>(
-          "/explore"
+          `/explore/?brain_id=${brainId}`
         );
         setDocuments(response.data.documents);
       } catch (error) {
@@ -37,12 +62,12 @@ export default function ExplorePage() {
       }
       setIsPending(false);
     };
-    fetchDocuments();
-  }, [session.access_token]);
+    fetchDocuments(currentBrainId);
+  }, [session.access_token, axiosInstance, currentBrainId]);
 
   return (
     <main>
-      <section className="w-full outline-none pt-32 flex flex-col gap-5 items-center justify-center p-6">
+      <section className="w-full outline-none pt-10 flex flex-col gap-5 items-center justify-center p-6">
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-3xl font-bold text-center">
             Explore uploaded data
@@ -78,4 +103,6 @@ export default function ExplorePage() {
       </section>
     </main>
   );
-}
+};
+
+export default ExplorePage;

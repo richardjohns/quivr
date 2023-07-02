@@ -1,8 +1,10 @@
 "use client";
-import Button from "@/app/components/ui/Button";
-import Card from "@/app/components/ui/Card";
-import Field from "@/app/components/ui/Field";
+import Button from "@/lib/components/ui/Button";
+import Card from "@/lib/components/ui/Card";
+import Field from "@/lib/components/ui/Field";
+import { useBrainContext } from "@/lib/context/BrainProvider/hooks/useBrainContext";
 import { useState } from 'react';
+
 import { useCrawler } from "./hooks/useCrawler";
 
 export const Crawler = (): JSX.Element => {
@@ -22,6 +24,7 @@ export const Crawler = (): JSX.Element => {
       }
     }
   }
+  const { currentBrain } = useBrainContext();
 
   return (
     <div className="w-full">
@@ -42,7 +45,10 @@ export const Crawler = (): JSX.Element => {
                 )}
               </div>
               <div className="flex flex-col items-center justify-center gap-5">
-                <Button isLoading={isCrawling} onClick={handleCrawlWebsite}>
+                <Button
+                  isLoading={isCrawling}
+                  onClick={() => void crawlWebsite(currentBrain.id)}
+                >
                   Crawl
                 </Button>
               </div>

@@ -12,7 +12,7 @@
 
 Quivr, your second brain, utilizes the power of GenerativeAI to store and retrieve unstructured information. Think of it as Obsidian, but turbocharged with AI capabilities.
 
-[Roadmap here](https://brains.quivr.app)
+[Roadmap here](https://brain.quivr.app)
 
 ## Key Features 🎯
 
@@ -20,12 +20,14 @@ Quivr, your second brain, utilizes the power of GenerativeAI to store and retrie
 - **Generative AI**: Quivr employs advanced AI to assist you in generating and retrieving information.
 - **Fast and Efficient**: Designed with speed and efficiency at its core. Quivr ensures rapid access to your data.
 - **Secure**: Your data, your control. Always.
+- **OS Compatible**: Ubuntu 22 or upper.
 - **File Compatibility**: 
   - Text
   - Markdown
   - PDF
   - Powerpoint
-  - Excel
+  - Excel (Not Yet)
+  - Csv
   - Word
   - Audio
   - Video
@@ -39,7 +41,7 @@ https://github.com/StanGirard/quivr/assets/19614572/a6463b73-76c7-4bc0-978d-7056
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
-You can find everything on the documentation [here](https://brains.quivr.app/)
+You can find everything on the documentation [here](https://brain.quivr.app/)
 
 ### Prerequisites 📋
 
@@ -71,7 +73,18 @@ Additionally, you'll need a [Supabase](https://supabase.com/) account for:
   git clone git@github.com:StanGirard/Quivr.git && cd Quivr
   ```
 
-- **Step 2**: Copy the `.XXXXX_env` files
+- **Step 2**: Use the install helper
+
+You can use the install_helper.sh script to setup your env files
+
+```bash
+brew install gum # Windows (via Scoop) scoop install charm-gum
+
+chmod +x install_helper.sh
+./install_helper.sh
+```
+
+- **Step 2 - Bis**: Copy the `.XXXXX_env` files
 
 ```bash
 cp .backend_env.example backend/.env
@@ -85,15 +98,24 @@ cp .frontend_env.example frontend/.env
 
 > _Your  `JWT_SECRET_KEY`can be found in your supabase settings under Project Settings -> API -> JWT Settings -> JWT Secret_
 
-> _To activate vertexAI with PaLM from GCP follow the instructions [here](https://python.langchain.com/en/latest/modules/models/llms/integrations/google_vertex_ai_palm.html) and update `bacend/.env`- It is an advanced feature, please be expert in GCP before trying to use it_
+> _To activate vertexAI with PaLM from GCP follow the instructions [here](https://python.langchain.com/en/latest/modules/models/llms/integrations/google_vertex_ai_palm.html) and update `backend/.env`- It is an advanced feature, please be expert in GCP before trying to use it_
 
 - [ ] Change variables in `backend/.env`
 - [ ] Change variables in `frontend/.env`
 
 - **Step 4**: Run the following migration scripts on the Supabase database via the web interface (SQL Editor -> `New query`)
 
-[Creation Script 1](scripts/tables.sql)
+Use the `migration.sh` script to run the migration scripts
 
+```bash
+chmod +x migration.sh
+./migration.sh
+```
+
+And choose either create_scripts if first time or migrations if you are updating your database
+
+
+All scripts can be found in the [scripts](scripts/) folder
 > _If you come from an old version of Quivr, run the scripts in [migration script](scripts/) to migrate your data to the new version in the order of date_
 
 - **Step 5**: Launch the app
@@ -151,7 +173,7 @@ This project could not be possible without the support of our sponsors. Thank yo
 
 ## License 📄
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
 
 ## Stars History 📈

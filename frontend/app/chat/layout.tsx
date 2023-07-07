@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { ChatsProvider } from "@/lib/context/ChatsProvider/chats-provider";
 import { useSupabase } from "@/lib/context/SupabaseProvider";
 
-import { ChatsList } from "./components";
+import { ChatsList } from "./components/ChatsList";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -19,7 +19,7 @@ const Layout = ({ children }: LayoutProps): JSX.Element => {
 
   return (
     <ChatsProvider>
-      <div className="relative h-full w-full flex items-start">
+      <div className="relative h-full w-full flex justify-stretch items-stretch">
         <ChatsList />
         {children}
       </div>

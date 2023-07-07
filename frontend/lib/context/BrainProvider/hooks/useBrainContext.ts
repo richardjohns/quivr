@@ -1,11 +1,9 @@
-import { createContext, useContext } from "react";
+import { useContext } from "react";
 
-import { BrainStateProps } from "./useBrainState";
-import { ScopeContext } from "../types";
+import { BrainContext } from "../brain-provider";
+import { BrainContextType } from "../types";
 
-export const BrainContext = createContext<ScopeContext | undefined>(undefined);
-
-export const useBrainContext = (): BrainStateProps => {
+export const useBrainContext = (): BrainContextType => {
   const context = useContext(BrainContext);
 
   if (context === undefined) {

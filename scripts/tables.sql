@@ -157,3 +157,14 @@ CREATE TABLE IF NOT EXISTS brains_vectors (
   FOREIGN KEY (vector_id) REFERENCES vectors (id),
   FOREIGN KEY (brain_id) REFERENCES brains (brain_id)
 );
+
+CREATE TABLE IF NOT EXISTS migrations (
+  name VARCHAR(255)  PRIMARY KEY,
+  executed_at TIMESTAMPTZ DEFAULT current_timestamp
+);
+
+INSERT INTO migrations (name) 
+SELECT '20230629143400_add_file_sha1_brains_vectors'
+WHERE NOT EXISTS (
+    SELECT 1 FROM migrations WHERE name = '20230629143400_add_file_sha1_brains_vectors'
+);

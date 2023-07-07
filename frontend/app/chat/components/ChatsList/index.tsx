@@ -1,18 +1,19 @@
-/* eslint-disable */
 "use client";
-import useChatsContext from "@/lib/context/ChatsProvider/hooks/useChatsContext";
-import { cn } from "@/lib/utils";
-import { MotionConfig, motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { MdChevronRight } from "react-icons/md";
 
-import { NewChatButton } from "./NewChatButton";
-import { ChatsListItem } from "./components/ChatsListItem/";
+import { useChatsContext } from "@/lib/context/ChatsProvider/hooks/useChatsContext";
+import { cn } from "@/lib/utils";
+
+import { ChatsListItem } from "./components/ChatsListItem";
 import { MiniFooter } from "./components/ChatsListItem/components/MiniFooter";
+import { NewChatButton } from "./components/NewChatButton";
 import { useChatsList } from "./hooks/useChatsList";
 
 export const ChatsList = (): JSX.Element => {
-  const { allChats, deleteChat } = useChatsContext();
+  const { allChats } = useChatsContext();
   const { open, setOpen } = useChatsList();
+
   return (
     <MotionConfig transition={{ mass: 1, damping: 10 }}>
       <motion.div
@@ -26,7 +27,7 @@ export const ChatsList = (): JSX.Element => {
             setOpen(false);
           }
         }}
-        className="lg:sticky fixed top-0 left-0 bottom-0 overflow-visible z-30 border-r border-black/10 dark:border-white/25 bg-white dark:bg-black"
+        className="flex flex-col lg:sticky fixed top-16 left-0 bottom-0 lg:h-[90vh] overflow-visible z-30 border-r border-black/10 dark:border-white/25 bg-white dark:bg-black"
       >
         <motion.div
           animate={{
@@ -36,24 +37,17 @@ export const ChatsList = (): JSX.Element => {
               ? "10px 10px 16px rgba(0, 0, 0, 0)"
               : "10px 10px 16px rgba(0, 0, 0, 0.5)",
           }}
-          className={cn("overflow-hidden")}
+          className={cn("overflow-hidden flex flex-col flex-1")}
+          data-testid="chats-list"
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              height: "90vh",
-            }}
-          >
+          <div className="flex flex-col flex-1">
             <NewChatButton />
-            <div style={{ flex: 1, overflow: "scroll", height: "100%" }}>
+            <div
+              data-testid="chats-list-items"
+              className="flex-1 overflow-auto scrollbar h-full"
+            >
               {allChats.map((chat) => (
-                <ChatsListItem
-                  key={chat.chat_id}
-                  chat={chat}
-                  deleteChat={deleteChat}
-                />
+                <ChatsListItem key={chat.chat_id} chat={chat} />
               ))}
             </div>
             <MiniFooter />
@@ -64,6 +58,7 @@ export const ChatsList = (): JSX.Element => {
             setOpen(!open);
           }}
           className="absolute left-full top-16 text-3xl bg-black dark:bg-white text-white dark:text-black rounded-r-full p-3 pl-1"
+          data-testid="chats-list-toggle"
         >
           <motion.div
             whileTap={{ scale: 0.9 }}
